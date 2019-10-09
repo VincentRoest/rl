@@ -2,6 +2,8 @@ import argparse
 import matplotlib.pyplot as plt
 
 from data_utils.cartpole_env import CartpoleEnv 
+from data_utils.pong_env import PongEnv
+
 from model import DQN
 from memory import ReplayMemory
 from train import train_model
@@ -32,6 +34,10 @@ if __name__ == '__main__':
     env = CartpoleEnv()
     env.show_example()
     env.env.close()
+  if (params.use_env == 'pong'):
+    env = PongEnv()
+    env.show_example()
+    env.env.close()
 
   init_screen = env.get_screen()
   _, _, screen_height, screen_width = init_screen.shape
@@ -40,6 +46,7 @@ if __name__ == '__main__':
   n_actions = env.env.action_space.n
 
   policy_net = DQN(screen_height, screen_width, n_actions).to(device)
+
   target_net = DQN(screen_height, screen_width, n_actions).to(device)
   target_net.load_state_dict(policy_net.state_dict())
   target_net.eval()
@@ -48,6 +55,7 @@ if __name__ == '__main__':
   memory = ReplayMemory(10000)
 
   episode_durations = train_model(env, optimizer, policy_net, target_net, memory, params)
+
   print (episode_durations)
   print('Complete')
 

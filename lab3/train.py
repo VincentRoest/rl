@@ -68,7 +68,6 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
   # state value or 0 in case the state was final.
   next_state_values = torch.zeros(params.batch_size, device=device)
 
-  # TODO: warning bool comes from here
   if (params.target_update > -1):
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
   else:
@@ -129,6 +128,7 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
 
       # Update the target network, copying all weights and biases in DQN
       if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
+          print (episode_durations)
           print ('updating target')
           target_net.load_state_dict(policy_net.state_dict())
   
