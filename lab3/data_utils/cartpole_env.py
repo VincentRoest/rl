@@ -42,7 +42,7 @@ class CartpoleEnv():
     # Cart is in the lower half, so strip off the top and bottom of the screen
     _, screen_height, screen_width = screen.shape
     screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
-    view_width = int(screen_width * 0.6)
+    view_width = int(screen_width * 0.6) # could reduce this a bit to further seepd up
     cart_location = self.get_cart_location(screen_width)
     if cart_location < view_width // 2:
         slice_range = slice(view_width)
