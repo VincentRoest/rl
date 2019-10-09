@@ -58,5 +58,6 @@ if __name__ == '__main__':
 
   print (episode_durations)
   print('Complete')
+  env.env.close()
 
 
