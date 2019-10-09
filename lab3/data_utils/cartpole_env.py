@@ -1,14 +1,6 @@
-######################################################################
-# Input extraction
-# ^^^^^^^^^^^^^^^^
-#
-# The code below are utilities for extracting and processing rendered
-# images from the environment. It uses the ``torchvision`` package, which
-# makes it easy to compose image transforms. Once you run the cell it will
-# display an example patch that it extracted.
-#
-
 import gym
+from gym import wrappers
+
 import math
 import random
 import numpy as np
@@ -32,19 +24,11 @@ resize = T.Compose([T.ToPILImage(),
                       T.Resize(40, interpolation=Image.CUBIC),
                       T.ToTensor()])
 
-# set up matplotlib
-is_ipython = 'inline' in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
-  
-plt.ion()
-
-
 class CartpoleEnv():
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-
-    self.env = gym.make('CartPole-v0').unwrapped
+    env = gym.make('CartPole-v0').unwrapped
+    self.env = env
 
   def get_cart_location(self, screen_width):
     world_width = self.env.x_threshold * 2
@@ -78,6 +62,7 @@ class CartpoleEnv():
 
   def show_example(self):
     self.env.reset()
+    print (self.get_screen().cpu().size())
     plt.figure()
     plt.imshow(self.get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
               interpolation='none')
