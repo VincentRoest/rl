@@ -27,10 +27,10 @@ Transition = namedtuple('Transition',
 
 class ReplayMemory(object):
 
-    def __init__(self, capacity):
+    def __init__(self, capacity, memory=[], position=0):
         self.capacity = capacity
-        self.memory = []
-        self.position = 0
+        self.memory = memory
+        self.position = position
 
     def push(self, *args):
         """Saves a transition."""
@@ -44,3 +44,6 @@ class ReplayMemory(object):
 
     def __len__(self):
         return len(self.memory)
+
+    def get_state(self):
+        return [self.capacity, self.memory, self.position]

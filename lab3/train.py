@@ -1,5 +1,9 @@
+import os
+
 from collections import namedtuple
 from tqdm import tqdm
+
+import matplotlib.pyplot as plt
 
 #import traceback
 #import warnings
@@ -13,12 +17,12 @@ import torch
 import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-from utils import plot_durations
+from utils import plot_durations, plot_screen
 
 # TODO: this is now a duplicate code
 #Transition = namedtuple('Transition',
 #                        ('state', 'action', 'next_state', 'reward'))
-from memory import Transition
+from memory import ReplayMemory, Transition
 
 steps_done = 0
 
@@ -89,13 +93,29 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
         param.grad.data.clamp_(-1, 1)
   optimizer.step()
 
-import matplotlib.pyplot as plt
+def train_model(env, optimizer, policy_net, target_net, params):
 
-def train_model(env, optimizer, policy_net, target_net, memory, params):
-  episode_durations = []
-  num_episodes = params.num_episodes
-  rewards = []
-  for i_episode in tqdm(range(num_episodes)):
+  os.makedirs(os.path.dirname(params.save_path), exist_ok=True)
+
+  if params.load_path is not None:
+    checkpoint = torch.load(params.load_path)
+    policy_net.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    memory = ReplayMemory(*checkpoint['memory_state'])
+    episode_durations = checkpoint['episode_durations']
+    rewards = checkpoint['rewards']
+  else:
+    memory = ReplayMemory(1000)
+    episode_durations = []
+    rewards = []
+
+  target_net.load_state_dict(policy_net.state_dict())
+  target_net.eval()
+
+  if params.show_screen == True:
+    fig = plt.figure()
+
+  for i_episode in tqdm(range(params.num_episodes)):
     episode_reward = 0
     # Initialize the environment and state
     env.env.reset()
@@ -103,6 +123,10 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
     current_screen = env.get_screen()
     state = current_screen - last_screen
     for t in count():
+
+      if params.show_screen == True:
+        plot_screen(fig, current_screen)
+
       # Select and perform an action
       action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
       _, reward, done, _ = env.env.step(action.item())
@@ -129,7 +153,7 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
 
       if done:
         rewards.append(episode_reward)
-        # print (episode_reward)
+        # print(episode_reward)
         episode_durations.append(t + 1)
         # print (episode_durations)
         # plot_durations(episode_durations)
@@ -138,7 +162,17 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
     # Update the target network, copying all weights and biases in DQN
     if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
       # print(episode_durations)
-      print('updating target')
+      print ('updating target')
       target_net.load_state_dict(policy_net.state_dict())
+
+    if i_episode % params.save_every == 0 \
+        or i_episode == params.num_episodes - 1:
+      torch.save({
+        'model_state_dict': policy_net.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'memory_state': memory.get_state(),
+        'episode_durations': episode_durations,
+        'rewards': rewards
+        }, params.save_path)
   
   return episode_durations, rewards

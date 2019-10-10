@@ -5,7 +5,6 @@ from data_utils.cartpole_env import CartpoleEnv
 from data_utils.pong_env import PongEnv
 
 from model import DQN
-from memory import ReplayMemory
 from train import train_model
 
 import torch
@@ -26,6 +25,12 @@ parser.add_argument("--clip_rewards", type=bool, default=False, help="Do clippin
 parser.add_argument("--double_q", type=bool, default=False, help="Do Double Q Learning (default off)")
 
 parser.add_argument("--num_episodes", type=int, default=500, help="Number of episodes to train for")
+
+parser.add_argument("--save_path", type=str, default='saved_checkpoints/MODEL_CHECKPOINT.pth', help="Path to save model checkpoints to")
+parser.add_argument("--load_path", type=str, default=None, help="Path to load model checkpoint from")
+parser.add_argument("--save_every", type=int, default=1, help="Amount of episodes after which model checkpoint is saved")
+
+parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
 
 
 if __name__ == '__main__':
@@ -56,18 +61,13 @@ if __name__ == '__main__':
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
   print('parameter count: {}'.format(count_parameters(policy_net)))
 
-  target_net.load_state_dict(policy_net.state_dict())
-  target_net.eval()
-
   optimizer = optim.Adam(policy_net.parameters())
-  memory = ReplayMemory(1000)
 
-  episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, memory, params)
+  episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, params)
 
   print('episode durations: {}'.format(episode_durations))
   print('Complete')
 
-  
   env.env.close()
   plt.ioff()
   plt.show()
