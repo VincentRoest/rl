@@ -89,9 +89,11 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
         param.grad.data.clamp_(-1, 1)
   optimizer.step()
 
+import matplotlib.pyplot as plt
+
 def train_model(env, optimizer, policy_net, target_net, memory, params):
   episode_durations = []
-  num_episodes = 5
+  num_episodes = params.num_episodes
   rewards = []
   for i_episode in tqdm(range(num_episodes)):
     episode_reward = 0
@@ -127,7 +129,7 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
 
       if done:
         rewards.append(episode_reward)
-        print (episode_reward)
+        # print (episode_reward)
         episode_durations.append(t + 1)
         # print (episode_durations)
         # plot_durations(episode_durations)
@@ -135,8 +137,8 @@ def train_model(env, optimizer, policy_net, target_net, memory, params):
 
     # Update the target network, copying all weights and biases in DQN
     if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
-      print (episode_durations)
-      print ('updating target')
+      # print(episode_durations)
+      print('updating target')
       target_net.load_state_dict(policy_net.state_dict())
   
   return episode_durations, rewards

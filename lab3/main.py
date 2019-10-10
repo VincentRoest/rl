@@ -25,6 +25,7 @@ parser.add_argument("--clip_rewards", type=bool, default=False, help="Do clippin
 # todo
 parser.add_argument("--double_q", type=bool, default=False, help="Do Double Q Learning (default off)")
 
+parser.add_argument("--num_episodes", type=int, default=500, help="Number of episodes to train for")
 
 
 if __name__ == '__main__':
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
   def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
-  print (count_parameters(policy_net))
+  print('parameter count: {}'.format(count_parameters(policy_net)))
 
   target_net.load_state_dict(policy_net.state_dict())
   target_net.eval()
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 
   episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, memory, params)
 
-  print (episode_durations)
+  print('episode durations: {}'.format(episode_durations))
   print('Complete')
 
   

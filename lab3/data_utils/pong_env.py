@@ -1,29 +1,46 @@
 import gym
 from gym import wrappers
 
-import math
-import random
+#import math
+#import random
 import numpy as np
-import matplotlib
+#import matplotlib
 import matplotlib.pyplot as plt
-from collections import namedtuple
-from itertools import count
-from PIL import Image
+#from collections import namedtuple
+#from itertools import count
+#from PIL import Image
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import torchvision.transforms as T
+#import torch.nn as nn
+#import torch.optim as optim
+#import torch.nn.functional as F
+#import torchvision.transforms as T
 
 # if gpu is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class PongEnv():
+
+  # wrapper to force environment to stop once a point is scored
+  class EnvWrapper():
+    def __init__(self, env):
+      self.env = env
+    def __getattr__(self, attr):
+      orig_attr = self.env.__getattribute__(attr)
+      if attr == 'step':
+        def func(*args, **kwargs):
+          result = orig_attr(*args, **kwargs)
+          if result[1] != 0:
+            result = tuple([*result[:2], True, *result[3:]])
+          return result
+        return func
+      else:
+        return orig_attr
+
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     env = gym.make("PongDeterministic-v4").unwrapped
-    self.env = env # wrappers.Monitor(env, 'tmp/pong', video_callable=False, force=True) 
+    self.env = self.EnvWrapper(env) # wrappers.Monitor(env, 'tmp/pong', video_callable=False, force=True) 
 
   def get_screen(self):
     # Preprocessing from https://gist.github.com/karpathy/a4166c7fe253700972fcbc77e4ea32c5
