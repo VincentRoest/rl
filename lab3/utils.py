@@ -1,8 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
 
-plt.ion()
-
 def plot_durations(durations):
     plt.figure(2)
     plt.clf()

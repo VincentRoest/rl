@@ -30,6 +30,8 @@ parser.add_argument("--double_q", type=bool, default=False, help="Do Double Q Le
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
 
+  plt.ion()
+
   if (params.use_env == 'cartpole'):
     env = CartpoleEnv()
     env.show_example()
@@ -52,7 +54,6 @@ if __name__ == '__main__':
   def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
   print (count_parameters(policy_net))
-  
 
   target_net.load_state_dict(policy_net.state_dict())
   target_net.eval()
@@ -64,6 +65,11 @@ if __name__ == '__main__':
 
   print (episode_durations)
   print('Complete')
+
+  
   env.env.close()
+  plt.ioff()
+  plt.show()
+
 
 

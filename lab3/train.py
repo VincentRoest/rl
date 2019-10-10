@@ -1,9 +1,9 @@
 from collections import namedtuple
 from tqdm import tqdm
 
-import traceback
-import warnings
-import sys
+#import traceback
+#import warnings
+#import sys
 
 from itertools import count
 import random
@@ -16,8 +16,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from utils import plot_durations
 
 # TODO: this is now a duplicate code
-Transition = namedtuple('Transition',
-                        ('state', 'action', 'next_state', 'reward'))
+#Transition = namedtuple('Transition',
+#                        ('state', 'action', 'next_state', 'reward'))
+from memory import Transition
 
 steps_done = 0
 
@@ -90,7 +91,7 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
 
 def train_model(env, optimizer, policy_net, target_net, memory, params):
   episode_durations = []
-  num_episodes = 500
+  num_episodes = 5
   rewards = []
   for i_episode in tqdm(range(num_episodes)):
     episode_reward = 0

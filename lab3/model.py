@@ -1,8 +1,8 @@
-import torch
+#import torch
 import torch.nn as nn
-import torch.optim as optim
+#import torch.optim as optim
 import torch.nn.functional as F
-import torchvision.transforms as T
+#import torchvision.transforms as T
 
 class DQN(nn.Module):
     def __init__(self, h, w, outputs):

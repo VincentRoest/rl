@@ -41,10 +41,10 @@ class PongEnv():
 
   def show_example(self):
     self.env.reset()
-    plt.figure()
+    fig = plt.figure()
     plt.imshow(self.get_screen().cpu().squeeze(0).permute(1,2,0).numpy(),
               interpolation='none')
     plt.title('Example extracted screen')
     plt.show()
-    plt.pause(1)
-    plt.close()
+    fig.canvas.flush_events()
+    plt.pause(0.001)
