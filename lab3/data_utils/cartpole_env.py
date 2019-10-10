@@ -62,8 +62,8 @@ class CartpoleEnv():
 
   def show_example(self):
     self.env.reset()
-    print (self.get_screen().cpu().size())
     plt.figure()
+    print("%d bytes" % (self.get_screen().cpu().numpy().size * self.get_screen().cpu().numpy().itemsize))
     plt.imshow(self.get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
               interpolation='none')
     plt.title('Example extracted screen')

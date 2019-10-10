@@ -91,45 +91,51 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
 def train_model(env, optimizer, policy_net, target_net, memory, params):
   episode_durations = []
   num_episodes = 500
+  rewards = []
   for i_episode in tqdm(range(num_episodes)):
-      # Initialize the environment and state
-      env.env.reset()
-      last_screen = env.get_screen()
+    episode_reward = 0
+    # Initialize the environment and state
+    env.env.reset()
+    last_screen = env.get_screen()
+    current_screen = env.get_screen()
+    state = current_screen - last_screen
+    for t in count():
+      # Select and perform an action
+      action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
+      _, reward, done, _ = env.env.step(action.item())
+      reward = torch.tensor([reward], device=device)
+
+      episode_reward += reward.item()
+
+      # Observe new state
+      last_screen = current_screen
       current_screen = env.get_screen()
-      state = current_screen - last_screen
-      for t in count():
-          # Select and perform an action
-          action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
-          _, reward, done, _ = env.env.step(action.item())
-          reward = torch.tensor([reward], device=device)
+      if not done:
+        next_state = current_screen - last_screen
+      else:
+        next_state = None
 
-          # Observe new state
-          last_screen = current_screen
-          current_screen = env.get_screen()
-          if not done:
-              next_state = current_screen - last_screen
-          else:
-              next_state = None
+      # Store the transition in memory
+      memory.push(state, action, next_state, reward)
 
-          # Store the transition in memory
-          memory.push(state, action, next_state, reward)
+      # Move to the next state
+      state = next_state
 
-          # Move to the next state
-          state = next_state
+      # Perform one step of the optimization (on the target network)
+      optimize_model(policy_net, target_net, memory, optimizer, params)
 
-          # Perform one step of the optimization (on the target network)
-          optimize_model(policy_net, target_net, memory, optimizer, params)
+      if done:
+        rewards.append(episode_reward)
+        print (episode_reward)
+        episode_durations.append(t + 1)
+        # print (episode_durations)
+        # plot_durations(episode_durations)
+        break
 
-          if done:
-              episode_durations.append(t + 1)
-              # print (episode_durations)
-              # plot_durations(episode_durations)
-              break
-
-      # Update the target network, copying all weights and biases in DQN
-      if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
-          print (episode_durations)
-          print ('updating target')
-          target_net.load_state_dict(policy_net.state_dict())
+    # Update the target network, copying all weights and biases in DQN
+    if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
+      print (episode_durations)
+      print ('updating target')
+      target_net.load_state_dict(policy_net.state_dict())
   
-  return episode_durations
+  return episode_durations, rewards

@@ -15,8 +15,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser(description='RL training')
 parser.add_argument("--use_env", type=str, default='cartpole', help="Specify environments"),
-parser.add_argument("--batch_size", type=int, default=128),
-parser.add_argument("--gamma", type=float, default=0.999),
+parser.add_argument("--batch_size", type=int, default=32),
+parser.add_argument("--gamma", type=float, default=0.9),
 parser.add_argument("--eps_start", type=float, default=0.9, help="Starting exploration rate")
 parser.add_argument("--eps_end", type=float, default=0.05, help="Ending exploration rate")
 parser.add_argument("--eps_decay", type=int, default=200, help="How many episodes to decay exploration rate")
@@ -48,13 +48,19 @@ if __name__ == '__main__':
   policy_net = DQN(screen_height, screen_width, n_actions).to(device)
 
   target_net = DQN(screen_height, screen_width, n_actions).to(device)
+
+  def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+  print (count_parameters(policy_net))
+  
+
   target_net.load_state_dict(policy_net.state_dict())
   target_net.eval()
 
-  optimizer = optim.RMSprop(policy_net.parameters())
-  memory = ReplayMemory(10000)
+  optimizer = optim.Adam(policy_net.parameters())
+  memory = ReplayMemory(1000)
 
-  episode_durations = train_model(env, optimizer, policy_net, target_net, memory, params)
+  episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, memory, params)
 
   print (episode_durations)
   print('Complete')
