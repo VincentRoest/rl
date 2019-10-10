@@ -43,6 +43,7 @@ def select_action(model, state, params, n_actions=2):
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
 def optimize_model(policy_net, target_net, memory, optimizer, params):
+  assert memory.capacity >= params.batch_size, 'Batch size can\'t be larger than replay memory capacity'
   if len(memory) < params.batch_size:
       return
   transitions = memory.sample(params.batch_size)
@@ -105,7 +106,7 @@ def train_model(env, optimizer, policy_net, target_net, params):
     episode_durations = checkpoint['episode_durations']
     rewards = checkpoint['rewards']
   else:
-    memory = ReplayMemory(1000)
+    memory = ReplayMemory(params.replay_size)
     episode_durations = []
     rewards = []
 
