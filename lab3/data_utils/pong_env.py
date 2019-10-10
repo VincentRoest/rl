@@ -22,15 +22,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class PongEnv():
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    env = gym.make("Pong-v0").unwrapped
+    env = gym.make("PongDeterministic-v4").unwrapped
     self.env = env # wrappers.Monitor(env, 'tmp/pong', video_callable=False, force=True) 
 
   def get_screen(self):
-    # Preprocessing from https://github.com/omkarv/pong-from-pixels/blob/master/pong-from-pixels.py
+    # Preprocessing from https://gist.github.com/karpathy/a4166c7fe253700972fcbc77e4ea32c5
     # Returned screen requested by Pong is 210x160x3, reshape into 75x80
     screen = self.env.render(mode='rgb_array')
-    screen = screen[35:185] # crop - remove 35px from start & 25px from end of image in x, to reduce redundant parts of image (i.e. after ball passes paddle)
-    screen = screen[::3,::3,:] # downsample by factor of 3, keep last dimension
+    screen = screen[35:185, :, :] # crop - remove 35px from start & 25px from end of image in x, to reduce redundant parts of image (i.e. after ball passes paddle)
+    screen = screen[::2,::2, :] # downsample by factor of 3, keep last dimension
     screen[screen == 144] = 0 # erase background (background type 1)
     screen[screen == 109] = 0 # erase background (background type 2)
     screen[screen != 0] = 1 # everything else (paddles, ball) just set to 1. this makes the image grayscale effectively
