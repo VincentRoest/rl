@@ -56,8 +56,10 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
   # (a final state would've been the one after which simulation ended)
   non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                         batch.next_state)), device=device, dtype=torch.bool)
-  non_final_next_states = torch.cat([s for s in batch.next_state
-                                              if s is not None])
+  _non_final_next_states = [s for s in batch.next_state if s is not None]
+  if len(_non_final_next_states) > 0:
+    non_final_next_states = torch.cat(_non_final_next_states)
+
   state_batch = torch.cat(batch.state)
   action_batch = torch.cat(batch.action)
   reward_batch = torch.cat(batch.reward)
@@ -74,10 +76,11 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
   # state value or 0 in case the state was final.
   next_state_values = torch.zeros(params.batch_size, device=device)
 
-  if (params.target_update > -1):
-    next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
-  else:
-    next_state_values[non_final_mask] = policy_net(non_final_next_states).max(1)[0].detach()
+  if len(_non_final_next_states) > 0:
+    if (params.target_update > -1):
+      next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
+    else:
+      next_state_values[non_final_mask] = policy_net(non_final_next_states).max(1)[0].detach()
 
   # Compute the expected Q values
   expected_state_action_values = (next_state_values * params.gamma) + reward_batch
@@ -94,6 +97,8 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
         param.grad.data.clamp_(-1, 1)
   optimizer.step()
 
+  return loss.item()
+
 def train_model(env, optimizer, policy_net, target_net, params):
 
   os.makedirs(os.path.dirname(params.save_path), exist_ok=True)
@@ -105,10 +110,12 @@ def train_model(env, optimizer, policy_net, target_net, params):
     memory = ReplayMemory(*checkpoint['memory_state'])
     episode_durations = checkpoint['episode_durations']
     rewards = checkpoint['rewards']
+    loss = checkpoint['loss']
   else:
     memory = ReplayMemory(params.replay_size)
     episode_durations = []
     rewards = []
+    loss = []
 
   target_net.load_state_dict(policy_net.state_dict())
   target_net.eval()
@@ -118,6 +125,7 @@ def train_model(env, optimizer, policy_net, target_net, params):
 
   for i_episode in tqdm(range(params.num_episodes)):
     episode_reward = 0
+    episode_loss = []
     # Initialize the environment and state
     env.env.reset()
     last_screen = env.get_screen()
@@ -150,10 +158,17 @@ def train_model(env, optimizer, policy_net, target_net, params):
       state = next_state
 
       # Perform one step of the optimization (on the target network)
-      optimize_model(policy_net, target_net, memory, optimizer, params)
+      cur_loss = optimize_model(
+          policy_net, target_net, memory, optimizer, params)
+      if cur_loss is not None:
+        episode_loss.append(cur_loss)
 
       if done:
         rewards.append(episode_reward)
+        if len(episode_loss) == 0:
+          loss.append(None)
+        else:
+          loss.append(sum(episode_loss) / len(episode_loss))
         # print(episode_reward)
         episode_durations.append(t + 1)
         # print (episode_durations)
@@ -173,7 +188,8 @@ def train_model(env, optimizer, policy_net, target_net, params):
         'optimizer_state_dict': optimizer.state_dict(),
         'memory_state': memory.get_state(),
         'episode_durations': episode_durations,
-        'rewards': rewards
+        'rewards': rewards,
+        'loss': loss
         }, params.save_path)
   
   return episode_durations, rewards
