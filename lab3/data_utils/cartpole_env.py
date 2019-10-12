@@ -21,8 +21,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 resize = T.Compose([T.ToPILImage(),
-                      T.Resize(40, interpolation=Image.CUBIC),
-                      T.ToTensor()])
+                    T.Resize(40, interpolation=Image.CUBIC),
+                    T.ToTensor()])
 
 class CartpoleEnv():
   def __init__(self, *args, **kwargs):
@@ -45,11 +45,11 @@ class CartpoleEnv():
     view_width = int(screen_width * 0.6) # could reduce this a bit to further seepd up
     cart_location = self.get_cart_location(screen_width)
     if cart_location < view_width // 2:
-        slice_range = slice(view_width)
+      slice_range = slice(view_width)
     elif cart_location > (screen_width - view_width // 2):
-        slice_range = slice(-view_width, None)
+      slice_range = slice(-view_width, None)
     else:
-        slice_range = slice(cart_location - view_width // 2,
+      slice_range = slice(cart_location - view_width // 2,
                             cart_location + view_width // 2)
     # Strip off the edges, so that we have a square image centered on a cart
     screen = screen[:, :, slice_range]
@@ -65,7 +65,7 @@ class CartpoleEnv():
     fig = plt.figure()
     print("%d bytes" % (self.get_screen().cpu().numpy().size * self.get_screen().cpu().numpy().itemsize))
     plt.imshow(self.get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
-              interpolation='none')
+               interpolation='none')
     plt.title('Example extracted screen')
     plt.show()
     fig.canvas.flush_events()

@@ -60,7 +60,7 @@ class PongEnv():
     self.env.reset()
     fig = plt.figure()
     plt.imshow(self.get_screen().cpu().squeeze(0).permute(1,2,0).numpy(),
-              interpolation='none')
+               interpolation='none')
     plt.title('Example extracted screen')
     plt.show()
     fig.canvas.flush_events()

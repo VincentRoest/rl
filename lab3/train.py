@@ -28,24 +28,24 @@ steps_done = 0
 
 # TODO: move ?where
 def select_action(model, state, params, n_actions=2):
-    global steps_done
-    sample = random.random()
-    eps_threshold = params.eps_end + (params.eps_start - params.eps_end) * \
-        math.exp(-1. * steps_done / params.eps_decay)
-    steps_done += 1
-    if sample > eps_threshold:
-        with torch.no_grad():
-            # t.max(1) will return largest column value of each row.
-            # second column on max result is index of where max element was
-            # found, so we pick action with the larger expected reward.
-            return model(state).max(1)[1].view(1, 1)
-    else:
-        return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
+  global steps_done
+  sample = random.random()
+  eps_threshold = params.eps_end + (params.eps_start - params.eps_end) * \
+      math.exp(-1. * steps_done / params.eps_decay)
+  steps_done += 1
+  if sample > eps_threshold:
+    with torch.no_grad():
+      # t.max(1) will return largest column value of each row.
+      # second column on max result is index of where max element was
+      # found, so we pick action with the larger expected reward.
+      return model(state).max(1)[1].view(1, 1)
+  else:
+    return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
 def optimize_model(policy_net, target_net, memory, optimizer, params):
   assert memory.capacity >= params.batch_size, 'Batch size can\'t be larger than replay memory capacity'
   if len(memory) < params.batch_size:
-      return
+    return
   transitions = memory.sample(params.batch_size)
   # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
   # detailed explanation). This converts batch-array of Transitions
@@ -55,7 +55,7 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
   # Compute a mask of non-final states and concatenate the batch elements
   # (a final state would've been the one after which simulation ended)
   non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                        batch.next_state)), device=device, dtype=torch.bool)
+                                          batch.next_state)), device=device, dtype=torch.bool)
   _non_final_next_states = [s for s in batch.next_state if s is not None]
   if len(_non_final_next_states) > 0:
     non_final_next_states = torch.cat(_non_final_next_states)
@@ -94,7 +94,7 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
 
   if (params.clip_rewards):
     for param in policy_net.parameters():
-        param.grad.data.clamp_(-1, 1)
+      param.grad.data.clamp_(-1, 1)
   optimizer.step()
 
   return loss.item()
