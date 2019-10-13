@@ -123,73 +123,77 @@ def train_model(env, optimizer, policy_net, target_net, params):
   if params.show_screen == True:
     fig = plt.figure()
 
-  for i_episode in tqdm(range(params.num_episodes)):
-    episode_reward = 0
-    episode_loss = []
-    # Initialize the environment and state
-    env.env.reset()
-    last_screen = env.get_screen()
-    current_screen = env.get_screen()
-    state = current_screen - last_screen
-    for t in count():
+  for seed in [42, 43, 44]:
+    torch.manual_seed(seed)
+    env.env.seed(seed)
 
-      if params.show_screen == True:
-        plot_screen(fig, current_screen)
-
-      # Select and perform an action
-      action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
-      _, reward, done, _ = env.env.step(action.item())
-      reward = torch.tensor([reward], device=device)
-
-      episode_reward += reward.item()
-
-      # Observe new state
-      last_screen = current_screen
+    for i_episode in tqdm(range(params.num_episodes)):
+      episode_reward = 0
+      episode_loss = []
+      # Initialize the environment and state
+      env.env.reset()
+      last_screen = env.get_screen()
       current_screen = env.get_screen()
-      if not done:
-        next_state = current_screen - last_screen
-      else:
-        next_state = None
+      state = current_screen - last_screen
+      for t in count():
 
-      # Store the transition in memory
-      memory.push(state, action, next_state, reward)
+        if params.show_screen == True:
+          plot_screen(fig, current_screen)
 
-      # Move to the next state
-      state = next_state
+        # Select and perform an action
+        action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
+        _, reward, done, _ = env.env.step(action.item())
+        reward = torch.tensor([reward], device=device)
 
-      # Perform one step of the optimization (on the target network)
-      cur_loss = optimize_model(
-          policy_net, target_net, memory, optimizer, params)
-      if cur_loss is not None:
-        episode_loss.append(cur_loss)
+        episode_reward += reward.item()
 
-      if done:
-        rewards.append(episode_reward)
-        if len(episode_loss) == 0:
-          loss.append(None)
+        # Observe new state
+        last_screen = current_screen
+        current_screen = env.get_screen()
+        if not done:
+          next_state = current_screen - last_screen
         else:
-          loss.append(sum(episode_loss) / len(episode_loss))
-        # print(episode_reward)
-        episode_durations.append(t + 1)
-        # print (episode_durations)
-        # plot_durations(episode_durations)
-        break
+          next_state = None
 
-    # Update the target network, copying all weights and biases in DQN
-    if (i_episode % params.target_update == 0 and target_net and params.target_update >= 0):
-      # print(episode_durations)
-      print ('updating target')
-      target_net.load_state_dict(policy_net.state_dict())
+        # Store the transition in memory
+        memory.push(state, action, next_state, reward)
 
-    if i_episode % params.save_every == 0 \
-        or i_episode == params.num_episodes - 1:
-      torch.save({
-        'model_state_dict': policy_net.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'memory_state': memory.get_state(),
-        'episode_durations': episode_durations,
-        'rewards': rewards,
-        'loss': loss
-        }, params.save_path)
-  
+        # Move to the next state
+        state = next_state
+
+        # Perform one step of the optimization (on the target network)
+        cur_loss = optimize_model(
+            policy_net, target_net, memory, optimizer, params)
+        if cur_loss is not None:
+          episode_loss.append(cur_loss)
+
+        if done:
+          rewards.append(episode_reward)
+          if len(episode_loss) == 0:
+            loss.append(None)
+          else:
+            loss.append(sum(episode_loss) / len(episode_loss))
+          # print(episode_reward)
+          episode_durations.append(t + 1)
+          # print (episode_durations)
+          # plot_durations(episode_durations)
+          break
+
+      # Update the target network, copying all weights and biases in DQN
+      if (i_episode % params.target_update == 0 and target_net and params.target_update >= 0):
+        # print(episode_durations)
+        print ('updating target')
+        target_net.load_state_dict(policy_net.state_dict())
+
+      if i_episode % params.save_every == 0 \
+          or i_episode == params.num_episodes - 1:
+        torch.save({
+          'model_state_dict': policy_net.state_dict(),
+          'optimizer_state_dict': optimizer.state_dict(),
+          'memory_state': memory.get_state(),
+          'episode_durations': episode_durations,
+          'rewards': rewards,
+          'loss': loss
+          }, '{}_{}'.format(params.save_path,seed,))
+    
   return episode_durations, rewards

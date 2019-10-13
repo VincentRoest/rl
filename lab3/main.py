@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
   optimizer = optim.Adam(policy_net.parameters())
 
-  params['save_path'] = 'saved_checkpoints/'+params.replay_size+'_replay'+params.target_update+'_target.pth'
+  setattr(params, 'save_path', 'saved_checkpoints/'+str(params.replay_size)+'_replay'+str(params.target_update)+'_target.pth')
 
   episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, params)
 
