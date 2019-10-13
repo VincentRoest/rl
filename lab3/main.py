@@ -2,6 +2,8 @@ import argparse
 import matplotlib.pyplot as plt
 import atexit
 
+from pprint import pprint
+
 from data_utils.cartpole_env import CartpoleEnv 
 from data_utils.pong_env import PongEnv
 
@@ -38,6 +40,9 @@ parser.add_argument("--seed", type=int, default=42, help="Seed used for randomne
 
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
+
+  print('Parameters:)
+  pprint(params.__dict__)
 
   plt.ion()
 
