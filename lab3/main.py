@@ -57,20 +57,16 @@ if __name__ == '__main__':
   # Get number of actions from gym action space
   n_actions = env.env.action_space.n
 
-  for replay_size in [100, 1000, 5000, 10000]:
-    policy_net = DQN(screen_height, screen_width, n_actions).to(device)
-    target_net = DQN(screen_height, screen_width, n_actions).to(device)
+  policy_net = DQN(screen_height, screen_width, n_actions).to(device)
+  target_net = DQN(screen_height, screen_width, n_actions).to(device)
 
-    def count_parameters(model):
-      return sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('parameter count: {}'.format(count_parameters(policy_net)))
+  def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+  print('parameter count: {}'.format(count_parameters(policy_net)))
 
-    optimizer = optim.Adam(policy_net.parameters())
+  optimizer = optim.Adam(policy_net.parameters())
 
-    setattr(params, 'replay_size', replay_size)
-    setattr(params, 'save_path', 'saved_checkpoints/'+str(params.replay_size)+'_replay'+str(params.target_update)+'_target.pth')
-
-    episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, params)
+  episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, params)
 
   print('episode durations: {}'.format(episode_durations))
   print('Complete')
