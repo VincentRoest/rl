@@ -123,8 +123,10 @@ def train_model(env, optimizer, policy_net, target_net, params):
   if params.show_screen == True:
     fig = plt.figure()
 
+<<<<<<< HEAD
   torch.manual_seed(params.seed)
   env.env.seed(params.seed)
+  random.seed(params.seed)
 
   for i_episode in tqdm(range(params.num_episodes)):
     episode_reward = 0
