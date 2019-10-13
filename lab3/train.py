@@ -126,6 +126,7 @@ def train_model(env, optimizer, policy_net, target_net, params):
   for seed in [42, 43, 44]:
     torch.manual_seed(seed)
     env.env.seed(seed)
+    random.seed(seed)
 
     for i_episode in tqdm(range(params.num_episodes)):
       episode_reward = 0
