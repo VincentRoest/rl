@@ -30,10 +30,9 @@ parser.add_argument("--replay_size", type=int, default=1000, help="Size of repla
 
 parser.add_argument("--save_path", type=str, default='saved_checkpoints/MODEL_CHECKPOINT.pth', help="Path to save model checkpoints to")
 parser.add_argument("--load_path", type=str, default=None, help="Path to load model checkpoint from")
-parser.add_argument("--save_every", type=int, default=1, help="Amount of episodes after which model checkpoint is saved")
+parser.add_argument("--save_every", type=int, default=10, help="Amount of episodes after which model checkpoint is saved")
 
 parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
-
 
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
@@ -65,6 +64,8 @@ if __name__ == '__main__':
   print('parameter count: {}'.format(count_parameters(policy_net)))
 
   optimizer = optim.Adam(policy_net.parameters())
+
+  params['save_path'] = 'saved_checkpoints/'+params.replay_size+'_replay'+params.target_update+'_target.pth'
 
   episode_durations, rewards = train_model(env, optimizer, policy_net, target_net, params)
 

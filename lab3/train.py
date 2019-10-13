@@ -176,7 +176,7 @@ def train_model(env, optimizer, policy_net, target_net, params):
         break
 
     # Update the target network, copying all weights and biases in DQN
-    if i_episode % params.target_update == 0 and target_net and params.target_update >= 0:
+    if (i_episode % params.target_update == 0 and target_net and params.target_update >= 0):
       # print(episode_durations)
       print ('updating target')
       target_net.load_state_dict(policy_net.state_dict())
