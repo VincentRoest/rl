@@ -59,7 +59,9 @@ class PongEnv():
   def show_example(self):
     self.env.reset()
     fig = plt.figure()
-    plt.imshow(self.get_screen().cpu().squeeze(0).permute(1,2,0).numpy(),
+    screen = self.get_screen().cpu()
+    print("%d bytes" % (screen.numpy().size * screen.numpy().itemsize))
+    plt.imshow(screen.squeeze(0).permute(1,2,0).numpy(),
                interpolation='none')
     plt.title('Example extracted screen')
     plt.show()

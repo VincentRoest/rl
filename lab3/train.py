@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-from utils import plot_durations, plot_screen
+from utils import plot_progress, plot_screen
 
 # TODO: this is now a duplicate code
 #Transition = namedtuple('Transition',
@@ -101,7 +101,9 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
 
 def train_model(env, optimizer, policy_net, target_net, params):
 
-  os.makedirs(os.path.dirname(params.save_path), exist_ok=True)
+  save_dir = os.path.dirname(params.save_path)
+  if save_dir != '':
+    os.makedirs(save_dir, exist_ok=True)
 
   if params.load_path is not None:
     checkpoint = torch.load(params.load_path)
@@ -168,15 +170,19 @@ def train_model(env, optimizer, policy_net, target_net, params):
         episode_loss.append(cur_loss)
 
       if done:
+        episode_durations.append(t + 1)
         rewards.append(episode_reward)
         if len(episode_loss) == 0:
           loss.append(None)
         else:
           loss.append(sum(episode_loss) / len(episode_loss))
         # print(episode_reward)
-        episode_durations.append(t + 1)
         # print (episode_durations)
-        # plot_durations(episode_durations)
+        if params.show_progress == True:
+          plot_progress(episode_durations, 'Duration', 2)
+          plot_progress(rewards, 'Reward', 3)
+          plot_progress([l if l is not None else 0 for l in loss],
+              'Average Loss', 4)
         break
 
     # Update the target network, copying all weights and biases in DQN

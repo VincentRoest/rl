@@ -34,7 +34,9 @@ parser.add_argument("--save_path", type=str, default='saved_checkpoints/MODEL_CH
 parser.add_argument("--load_path", type=str, default=None, help="Path to load model checkpoint from")
 parser.add_argument("--save_every", type=int, default=10, help="Amount of episodes after which model checkpoint is saved")
 
+parser.add_argument("--show_example", action='store_true', help="Show example of environment before training")
 parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
+parser.add_argument("--show_progress", action='store_true', help="Show plotted training progress")
 
 parser.add_argument("--seed", type=int, default=42, help="Seed used for randomness")
 
@@ -48,14 +50,14 @@ if __name__ == '__main__':
 
   if (params.use_env == 'cartpole'):
     env = CartpoleEnv()
-    env.show_example()
-    env.env.close()
   if (params.use_env == 'pong'):
     env = PongEnv()
-    env.show_example()
-    env.env.close()
   atexit.register(env.env.close)
 
+  if params.show_example == True:
+    env.show_example()
+
+  env.env.reset()
   init_screen = env.get_screen()
   _, _, screen_height, screen_width = init_screen.shape
 
