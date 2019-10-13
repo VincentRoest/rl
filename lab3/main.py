@@ -34,6 +34,8 @@ parser.add_argument("--save_every", type=int, default=10, help="Amount of episod
 
 parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
 
+parser.add_argument("--seed", type=int, default=42, help="Seed used for randomness")
+
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
 
