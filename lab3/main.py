@@ -26,7 +26,7 @@ parser.add_argument("--clip_rewards", type=bool, default=False, help="Do clippin
 parser.add_argument("--double_q", type=bool, default=False, help="Do Double Q Learning (default off)")
 
 parser.add_argument("--num_episodes", type=int, default=500, help="Number of episodes to train for")
-parser.add_argument("--replay_size", type=int, default=1000, help="Size of replay memory")
+parser.add_argument("--replay_size", type=int, default=10000, help="Size of replay memory")
 
 parser.add_argument("--save_path", type=str, default='saved_checkpoints/MODEL_CHECKPOINT.pth', help="Path to save model checkpoints to")
 parser.add_argument("--load_path", type=str, default=None, help="Path to load model checkpoint from")
