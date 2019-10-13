@@ -1,19 +1,19 @@
 import gym
-from gym import wrappers
+#from gym import wrappers
 
-import math
-import random
+#import math
+#import random
 import numpy as np
-import matplotlib
+#import matplotlib
 import matplotlib.pyplot as plt
-from collections import namedtuple
-from itertools import count
+#from collections import namedtuple
+#from itertools import count
 from PIL import Image
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
+#import torch.nn as nn
+#import torch.optim as optim
+#import torch.nn.functional as F
 import torchvision.transforms as T
 
 # if gpu is to be used
