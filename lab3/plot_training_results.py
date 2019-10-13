@@ -21,6 +21,11 @@ def main(params):
     rewards = np.asarray(checkpoint['rewards'], dtype=np.float)
     loss = np.asarray(checkpoint['loss'])
     
+    if params.n is not None:
+      episode_durations = episode_durations[:params.n]
+      rewards = rewards[:params.n]
+      loss = loss[:params.n]
+    
     if params.smoothing is not None:
       smoothing_filter = np.ones(params.smoothing) / params.smoothing
       
@@ -62,6 +67,8 @@ if __name__ == '__main__':
       help='Amount of datapoints to smooth over (take mean)')
   parser.add_argument('--alpha', type=float, default=1.0,
       help='Alpha value for plotting curves')
+  parser.add_argument('--n', type=int, default=None,
+      help='Maximum amount of data-points to plot')
   
   params, _ = parser.parse_known_args()
   
