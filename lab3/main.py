@@ -41,7 +41,7 @@ parser.add_argument("--seed", type=int, default=42, help="Seed used for randomne
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
 
-  print('Parameters:)
+  print('Parameters:')
   pprint(params.__dict__)
 
   plt.ion()
