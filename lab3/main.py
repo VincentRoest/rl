@@ -6,6 +6,7 @@ from pprint import pprint
 
 from data_utils.cartpole_env import CartpoleEnv 
 from data_utils.pong_env import PongEnv
+from data_utils.acrobot_env import AcrobotEnv
 
 from model import DQN
 from train import train_model
@@ -48,10 +49,12 @@ if __name__ == '__main__':
 
   plt.ion()
 
-  if (params.use_env == 'cartpole'):
+  if params.use_env == 'cartpole':
     env = CartpoleEnv()
-  if (params.use_env == 'pong'):
+  if params.use_env == 'pong':
     env = PongEnv()
+  if params.use_env == 'acrobot':
+    env = AcrobotEnv()
   atexit.register(env.env.close)
 
   if params.show_example == True:

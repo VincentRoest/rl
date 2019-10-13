@@ -123,7 +123,7 @@ def train_model(env, optimizer, policy_net, target_net, params):
   target_net.eval()
 
   if params.show_screen == True:
-    fig = plt.figure()
+    fig = plt.figure(2)
 
   torch.manual_seed(params.seed)
   env.env.seed(params.seed)
@@ -179,10 +179,10 @@ def train_model(env, optimizer, policy_net, target_net, params):
         # print(episode_reward)
         # print (episode_durations)
         if params.show_progress == True:
-          plot_progress(episode_durations, 'Duration', 2)
-          plot_progress(rewards, 'Reward', 3)
+          plot_progress(episode_durations, 'Duration', 3)
+          plot_progress(rewards, 'Reward', 4)
           plot_progress([l if l is not None else 0 for l in loss],
-              'Average Loss', 4)
+              'Average Loss', 5)
         break
 
     # Update the target network, copying all weights and biases in DQN
