@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser(description='RL training')
 parser.add_argument("--use_env", type=str, default='cartpole', help="Specify environments"),
-parser.add_argument("--batch_size", type=int, default=32),
+parser.add_argument("--batch_size", type=int, default=1),
 parser.add_argument("--gamma", type=float, default=0.9),
 parser.add_argument("--eps_start", type=float, default=0.9, help="Starting exploration rate")
 parser.add_argument("--eps_end", type=float, default=0.05, help="Ending exploration rate")
@@ -32,7 +32,7 @@ parser.add_argument("--save_path", type=str, default='saved_checkpoints/MODEL_CH
 parser.add_argument("--load_path", type=str, default=None, help="Path to load model checkpoint from")
 parser.add_argument("--save_every", type=int, default=10, help="Amount of episodes after which model checkpoint is saved")
 
-parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
+parser.add_argument("--show_screen", action='store_true', default=False, help="Show screen during training")
 
 if __name__ == '__main__':
   params, _ = parser.parse_known_args()
@@ -55,7 +55,8 @@ if __name__ == '__main__':
   # Get number of actions from gym action space
   n_actions = env.env.action_space.n
 
-  for replay_size in [100, 1000, 5000, 10000]:
+  for replay_size in [1]:
+    print ('replay size {}'.format(replay_size))
     policy_net = DQN(screen_height, screen_width, n_actions).to(device)
     target_net = DQN(screen_height, screen_width, n_actions).to(device)
 
