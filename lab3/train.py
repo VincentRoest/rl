@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-from utils import plot_durations, plot_screen
+from utils import plot_progress, plot_screen
 
 # TODO: this is now a duplicate code
 #Transition = namedtuple('Transition',
@@ -101,7 +101,9 @@ def optimize_model(policy_net, target_net, memory, optimizer, params):
 
 def train_model(env, optimizer, policy_net, target_net, params):
 
-  os.makedirs(os.path.dirname(params.save_path), exist_ok=True)
+  save_dir = os.path.dirname(params.save_path)
+  if save_dir != '':
+    os.makedirs(save_dir, exist_ok=True)
 
   if params.load_path is not None:
     checkpoint = torch.load(params.load_path)
@@ -121,80 +123,84 @@ def train_model(env, optimizer, policy_net, target_net, params):
   target_net.eval()
 
   if params.show_screen == True:
-    fig = plt.figure()
+    fig = plt.figure(2)
 
-  for seed in [42]:
-    torch.manual_seed(seed)
-    env.env.seed(seed)
-    random.seed(seed)
+  torch.manual_seed(params.seed)
+  env.env.seed(params.seed)
+  random.seed(params.seed)
 
-    for i_episode in tqdm(range(params.num_episodes)):
-      episode_reward = 0
-      episode_loss = []
-      # Initialize the environment and state
-      env.env.reset()
-      last_screen = env.get_screen()
+  for i_episode in tqdm(range(params.num_episodes)):
+    episode_reward = 0
+    episode_loss = []
+    # Initialize the environment and state
+    env.env.reset()
+    last_screen = env.get_screen()
+    current_screen = env.get_screen()
+    state = current_screen - last_screen
+    for t in count():
+
+      if params.show_screen == True:
+        plot_screen(fig, current_screen)
+
+      # Select and perform an action
+      action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
+      _, reward, done, _ = env.env.step(action.item())
+      reward = torch.tensor([reward], device=device)
+
+      episode_reward += reward.item()
+
+      # Observe new state
+      last_screen = current_screen
       current_screen = env.get_screen()
-      state = current_screen - last_screen
-      for t in count():
+      if not done:
+        next_state = current_screen - last_screen
+      else:
+        next_state = None
 
-        if params.show_screen == True:
-          plot_screen(fig, current_screen)
+      # Store the transition in memory
+      memory.push(state, action, next_state, reward)
 
-        # Select and perform an action
-        action = select_action(policy_net, state, params, n_actions=env.env.action_space.n)
-        _, reward, done, _ = env.env.step(action.item())
-        reward = torch.tensor([reward], device=device)
+      # Move to the next state
+      state = next_state
 
-        episode_reward += reward.item()
+      # Perform one step of the optimization (on the target network)
+      cur_loss = optimize_model(
+          policy_net, target_net, memory, optimizer, params)
+      if cur_loss is not None:
+        episode_loss.append(cur_loss)
 
-        # Observe new state
-        last_screen = current_screen
-        current_screen = env.get_screen()
-        if not done:
-          next_state = current_screen - last_screen
+      if done:
+        episode_durations.append(t + 1)
+        rewards.append(episode_reward)
+        if len(episode_loss) == 0:
+          loss.append(None)
         else:
-          next_state = None
+          loss.append(sum(episode_loss) / len(episode_loss))
+        # print(episode_reward)
+        # print (episode_durations)
+        if params.show_progress == True:
+          plot_progress(episode_durations, 'Duration', 3)
+          plot_progress(rewards, 'Reward', 4)
+          plot_progress([l if l is not None else 0 for l in loss],
+              'Average Loss', 5)
+        break
 
-        # Store the transition in memory
-        memory.push(state, action, next_state, reward)
+    # Update the target network, copying all weights and biases in DQN
+    if (i_episode % params.target_update == 0 and target_net and params.target_update >= 0):
+      # print(episode_durations)
+      print ('updating target')
+      target_net.load_state_dict(policy_net.state_dict())
 
-        # Move to the next state
-        state = next_state
-
-        # Perform one step of the optimization (on the target network)
-        cur_loss = optimize_model(
-            policy_net, target_net, memory, optimizer, params)
-        if cur_loss is not None:
-          episode_loss.append(cur_loss)
-
-        if done:
-          rewards.append(episode_reward)
-          if len(episode_loss) == 0:
-            loss.append(None)
-          else:
-            loss.append(sum(episode_loss) / len(episode_loss))
-          # print(episode_reward)
-          episode_durations.append(t + 1)
-          # print (episode_durations)
-          # plot_durations(episode_durations)
-          break
-
-      # Update the target network, copying all weights and biases in DQN
-      if (i_episode % params.target_update == 0 and target_net and params.target_update >= 0):
-        # print(episode_durations)
-        print ('updating target')
-        target_net.load_state_dict(policy_net.state_dict())
-
-      if i_episode % params.save_every == 0 \
-          or i_episode == params.num_episodes - 1:
-        torch.save({
-          'model_state_dict': policy_net.state_dict(),
-          'optimizer_state_dict': optimizer.state_dict(),
-          'memory_state': memory.get_state(),
-          'episode_durations': episode_durations,
-          'rewards': rewards,
-          'loss': loss
-          }, '{}_{}'.format(params.save_path,seed,))
+    if i_episode % params.save_every == 0 \
+        or i_episode == params.num_episodes - 1:
+      torch.save({
+        'model_state_dict': policy_net.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'memory_state': memory.get_state(),
+        'episode_durations': episode_durations,
+        'rewards': rewards,
+        'loss': loss,
+        'params': params
+        }, params.save_path)
     
   return episode_durations, rewards

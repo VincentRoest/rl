@@ -1,19 +1,19 @@
 import gym
-from gym import wrappers
+#from gym import wrappers
 
-import math
-import random
+#import math
+#import random
 import numpy as np
-import matplotlib
+#import matplotlib
 import matplotlib.pyplot as plt
-from collections import namedtuple
-from itertools import count
+#from collections import namedtuple
+#from itertools import count
 from PIL import Image
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
+#import torch.nn as nn
+#import torch.optim as optim
+#import torch.nn.functional as F
 import torchvision.transforms as T
 
 # if gpu is to be used
@@ -63,8 +63,9 @@ class CartpoleEnv():
   def show_example(self):
     self.env.reset()
     fig = plt.figure()
-    print("%d bytes" % (self.get_screen().cpu().numpy().size * self.get_screen().cpu().numpy().itemsize))
-    plt.imshow(self.get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
+    screen = self.get_screen().cpu()
+    print("%d bytes" % (screen.numpy().size * screen.numpy().itemsize))
+    plt.imshow(screen.squeeze(0).permute(1, 2, 0).numpy(),
                interpolation='none')
     plt.title('Example extracted screen')
     plt.show()
