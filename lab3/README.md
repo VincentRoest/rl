@@ -22,13 +22,13 @@ The easiest way to reproduce the results in the paper is by running the followin
 
 #### Target Update Experiments:
 
-`target_run.sh`
+`./target_run.sh`
 
 ```python plot_training_results.py --load_path=checkpoints_tu/cartpole_s42_tu-1.pth+checkpoints_tu/cartpole_s43_tu-1.pth+checkpoints_tu/cartpole_s44_tu-1.pth,checkpoints_tu/cartpole_s42_tu20.pth+checkpoints_tu/cartpole_s43_tu20.pth+checkpoints_tu/cartpole_s44_tu20.pth,checkpoints_tu/cartpole_s42_tu50.pth+checkpoints_tu/cartpole_s43_tu50.pth+checkpoints_tu/cartpole_s44_tu50.pth,checkpoints_tu/cartpole_s42_tu100.pth+checkpoints_tu/cartpole_s43_tu100.pth+checkpoints_tu/cartpole_s44_tu100.pth,checkpoints_tu/cartpole_s42_tu200.pth+checkpoints_tu/cartpole_s43_tu200.pth+checkpoints_tu/cartpole_s44_tu200.pth --smoothing=20 --labels=target_update=-1,target_update=20,target_update=50,target_update=100,target_update=200```
 
 #### Memory Buffer Experiments:
 
-`mem_run.sh`
+`./mem_run.sh`
 
 ```python plot_training_results.py --load_path=saved_checkpoints/1_24.pth+saved_checkpoints/1_42.pth+saved_checkpoints/1_44.pth,saved_checkpoints/100_24.pth+saved_checkpoints/100_42.pth+saved_checkpoints/100_44.pth,saved_checkpoints/1000_24.pth+saved_checkpoints/1000_42.pth+saved_checkpoints/1000_44.pth,saved_checkpoints/5000_24.pth+saved_checkpoints/5000_42.pth+saved_checkpoints/5000_44.pth,saved_checkpoints/10000_24.pth+saved_checkpoints/10000_42.pth+saved_checkpoints/10000_44.pth --labels=1,100,1000,5000,10000 --smoothing=50```
 
