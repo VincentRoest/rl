@@ -67,8 +67,10 @@ if __name__ == '__main__':
   # Get number of actions from gym action space
   n_actions = env.env.action_space.n
 
+
   policy_net = DQN(screen_height, screen_width, n_actions).to(device)
   target_net = DQN(screen_height, screen_width, n_actions).to(device)
+
 
   def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
