@@ -39,6 +39,8 @@ parser.add_argument("--show_example", action='store_true', help="Show example of
 parser.add_argument("--show_screen", action='store_true', help="Show screen during training")
 parser.add_argument("--show_progress", action='store_true', help="Show plotted training progress")
 
+parser.add_argument("--sample_repeat", action='store_true', help="Flag to let recall memory sample with repetition")
+
 parser.add_argument("--seed", type=int, default=42, help="Seed used for randomness")
 
 if __name__ == '__main__':

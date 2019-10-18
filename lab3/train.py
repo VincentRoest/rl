@@ -43,10 +43,11 @@ def select_action(model, state, params, n_actions=2):
     return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
 def optimize_model(policy_net, target_net, memory, optimizer, params):
-  assert memory.capacity >= params.batch_size, 'Batch size can\'t be larger than replay memory capacity'
-  if len(memory) < params.batch_size:
-    return
-  transitions = memory.sample(params.batch_size)
+  if not params.sample_repeat:
+    assert memory.capacity >= params.batch_size, 'Batch size can\'t be larger than replay memory capacity'
+    if len(memory) < params.batch_size:
+      return
+  transitions = memory.sample(params.batch_size, params.sample_repeat)
   # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
   # detailed explanation). This converts batch-array of Transitions
   # to Transition of batch-arrays.

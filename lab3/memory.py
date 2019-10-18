@@ -21,6 +21,7 @@
 
 from collections import namedtuple
 import random
+import numpy as np
 
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
@@ -39,7 +40,10 @@ class ReplayMemory(object):
     self.memory[self.position] = Transition(*args)
     self.position = (self.position + 1) % self.capacity
 
-  def sample(self, batch_size):
+  def sample(self, batch_size, repeat=False):
+    if repeat:
+      inds = np.random.choice(range(len(self.memory)), batch_size)
+      return [self.memory[ind] for ind in inds]
     return random.sample(self.memory, batch_size)
 
   def __len__(self):
