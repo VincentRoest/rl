@@ -76,6 +76,7 @@ def main(params):
       labels.append(label)
   else:
     labels = params.labels.split(',')
+    print (labels)
     assert len(labels) == len(load_paths), \
         'Number of given labels does not match amount of lines in the plot'
   
