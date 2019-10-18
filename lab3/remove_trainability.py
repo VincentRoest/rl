@@ -6,9 +6,7 @@ def main(path):
   remove = ['optimizer_state_dict', 'memory_state']
   checkpoint = dict(item for item in checkpoint.items()
       if item[0] not in remove)
-  torch.save({
-    'model_state_dict': checkpoint['model_state_dict']
-    }, path)
+  torch.save(checkpoint, path)
   return
 
 if __name__ == '__main__':
